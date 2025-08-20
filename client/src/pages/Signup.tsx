@@ -1,17 +1,79 @@
-import React from "react";
+import axios from "axios";
 import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  UserPlus,
-  Github,
   Chrome,
-  User,
+  EyeOff,
+  Github,
+  Loader,
+  Lock,
+  Mail,
   Phone,
+  User,
+  UserPlus,
 } from "lucide-react";
+import React, { useRef, useState } from "react";
+import toast from "react-hot-toast";
+
+interface UserTypes {
+  full_name: string;
+  email: string;
+  phone_number: number | undefined;
+  password: string;
+  date: string;
+}
 
 export default function SignUpPage() {
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [confirmMessage, setConfimMessage] = useState<string>("");
+  const [newUser, setNewUser] = useState<UserTypes>({
+    full_name: "",
+    email: "",
+    phone_number: undefined,
+    password: "",
+    date: new Date().toDateString(),
+  });
+
+  //update the newUser object
+  const handleUserDetails = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    console.log(e);
+    setNewUser((prev) => ({ ...prev, [name]: value }));
+  };
+
+  //confirm password
+  const handleConfirmPassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const confirmPass = e.target.value;
+    setConfirmPassword(confirmPass);
+    if (confirmPass !== newUser.password) {
+      setConfimMessage("Passwords not same");
+    } else if (confirmPass === newUser.password) {
+      setConfimMessage("");
+    }
+    console.log(typeof newUser.password, typeof confirmPassword);
+  };
+
+  //create new user, send details to server
+  const createNewUser = () => {
+    setLoading(true);
+    if (!newUser.email || !newUser.full_name || !newUser.password) {
+      toast.error("Fill all the fields", { id: "toast" });
+      return;
+    }
+
+    axios.post("http://localhost:4000/api/auth", newUser).then((res) => {
+      if (res.status === 200) {
+        toast.success("Account created successfully");
+      }
+    });
+    setNewUser({
+      full_name: "",
+      email: "",
+      phone_number: undefined,
+      password: "",
+      date: new Date().toDateString(),
+    });
+    setLoading(false);
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-100 via-white to-teal-100 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
@@ -40,6 +102,9 @@ export default function SignUpPage() {
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                 <input
                   type="text"
+                  name="full_name"
+                  onChange={(e) => handleUserDetails(e)}
+                  value={newUser.full_name}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all placeholder-slate-400"
                 />
@@ -55,6 +120,9 @@ export default function SignUpPage() {
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                 <input
                   type="email"
+                  name="email"
+                  value={newUser.email}
+                  onChange={(e) => handleUserDetails(e)}
                   placeholder="Enter your email"
                   className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all placeholder-slate-400"
                 />
@@ -70,6 +138,9 @@ export default function SignUpPage() {
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                 <input
                   type="tel"
+                  name="phone_number"
+                  value={newUser.phone_number}
+                  onChange={(e) => handleUserDetails(e)}
                   placeholder="Enter your phone number"
                   className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all placeholder-slate-400"
                 />
@@ -85,6 +156,9 @@ export default function SignUpPage() {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                 <input
                   type="password"
+                  name="password"
+                  value={newUser.password}
+                  onChange={(e) => handleUserDetails(e)}
                   placeholder="Create a password"
                   className="w-full pl-10 pr-12 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all placeholder-slate-400"
                 />
@@ -99,13 +173,20 @@ export default function SignUpPage() {
 
             {/* Confirm Password Field */}
             <div className="group">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Confirm Password
-              </label>
+              <div className="flex justify-between mb-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  Confirm Password
+                </label>
+                <p className="text-sm font-medium text-red-600/80 ">
+                  {confirmMessage}
+                </p>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                 <input
                   type="password"
+                  value={confirmPassword}
+                  onChange={(e) => handleConfirmPassword(e)}
                   placeholder="Confirm your password"
                   className="w-full pl-10 pr-12 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all placeholder-slate-400"
                 />
@@ -143,6 +224,8 @@ export default function SignUpPage() {
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
+                onChange={(e)=>console.log(e.target.value)}
+                
                 className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 focus:ring-2 mt-1"
               />
               <p className="text-sm text-slate-600">
@@ -164,9 +247,16 @@ export default function SignUpPage() {
             </div>
 
             {/* Sign Up Button */}
-            <button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-3">
-              <UserPlus className="w-5 h-5" />
-              Create Account
+            <button
+              onClick={createNewUser}
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3"
+            >
+              {loading ? (
+                <Loader className="h-5 w-5 animate-spin" />
+              ) : (
+                <UserPlus className="w-5 h-5" />
+              )}
+              {loading ? "Creating Account" : "Create Account"}
             </button>
           </div>
 
@@ -199,7 +289,7 @@ export default function SignUpPage() {
             <p className="text-slate-600">
               Already have an account?{" "}
               <a
-                href="#"
+                href="/login"
                 className="font-semibold text-emerald-600 hover:text-emerald-500 transition-colors"
               >
                 Sign in here

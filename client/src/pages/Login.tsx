@@ -111,7 +111,7 @@ export default function LoginPage() {
             <p className="text-slate-600">
               Don't have an account?{" "}
               <a
-                href="#"
+                href="/signup"
                 className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors"
               >
                 Sign up for free
