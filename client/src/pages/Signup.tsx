@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface UserTypes {
   full_name: string;
@@ -24,6 +25,7 @@ interface UserTypes {
 export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
   const [confirmMessage, setConfimMessage] = useState<string>("");
   const [newUser, setNewUser] = useState<UserTypes>({
     full_name: "",
@@ -36,7 +38,6 @@ export default function SignUpPage() {
   //update the newUser object
   const handleUserDetails = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(e);
     setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -49,7 +50,6 @@ export default function SignUpPage() {
     } else if (confirmPass === newUser.password) {
       setConfimMessage("");
     }
-    console.log(typeof newUser.password, typeof confirmPassword);
   };
 
   //create new user, send details to server
@@ -65,6 +65,7 @@ export default function SignUpPage() {
         toast.success("Account created successfully");
       }
     });
+    navigate("/login");
     setNewUser({
       full_name: "",
       email: "",
@@ -224,8 +225,7 @@ export default function SignUpPage() {
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
-                onChange={(e)=>console.log(e.target.value)}
-                
+                onChange={(e) => console.log(e.target.value)}
                 className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500 focus:ring-2 mt-1"
               />
               <p className="text-sm text-slate-600">

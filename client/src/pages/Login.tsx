@@ -1,7 +1,30 @@
-import React from "react";
-import { Mail, Lock, Eye, EyeOff, LogIn, Github, Chrome } from "lucide-react";
+import axios from "axios";
+import { Chrome, EyeOff, Github, Lock, LogIn, Mail } from "lucide-react";
+import { useState } from "react";
+
+interface UserTypes {
+  email: string;
+  password: string;
+}
 
 export default function LoginPage() {
+  const [userDetails, setUSerDetails] = useState<UserTypes>({
+    email: "",
+    password: "",
+  });
+
+  //authenticate the user
+  const handleLogin = () => {
+    axios
+      .post("http://localhost:4000/api/login", userDetails)
+      .then((res) => console.log(res));
+  };
+
+  //update the user object
+  const handleUserDetails = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUSerDetails((prev) => ({ ...prev, [name]: value }));
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
@@ -28,6 +51,9 @@ export default function LoginPage() {
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                 <input
                   type="email"
+                  value={userDetails.email}
+                  name="email"
+                  onChange={(e) => handleUserDetails(e)}
                   placeholder="Enter your email"
                   className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all placeholder-slate-400"
                 />
@@ -43,6 +69,9 @@ export default function LoginPage() {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                 <input
                   type="password"
+                  name="password"
+                  value={userDetails.password}
+                  onChange={(e) => handleUserDetails(e)}
                   placeholder="Enter your password"
                   className="w-full pl-10 pr-12 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all placeholder-slate-400"
                 />
@@ -75,7 +104,8 @@ export default function LoginPage() {
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-3"
+              onClick={handleLogin}
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex items-center justify-center gap-3"
             >
               <LogIn className="w-5 h-5" />
               Sign In
