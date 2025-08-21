@@ -10,10 +10,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
 
 interface EntryTypes {
   title: string;
-  date: string;
   mood: string;
   location: string;
   tags: [];
@@ -23,7 +23,6 @@ interface EntryTypes {
 export default function JournalEntry() {
   const [newEntry, setNewEntry] = useState<EntryTypes>({
     title: "",
-    date: new Date().toDateString(),
     mood: "",
     location: "",
     tags: [],
@@ -31,6 +30,7 @@ export default function JournalEntry() {
   });
   const [tags, setTags] = useState<any>([]);
   const [input, setInput] = useState("");
+  const {id}=useParams<{id:string}>()
 
   //handle entry of inputs
   const handleEntry = (
@@ -54,17 +54,17 @@ export default function JournalEntry() {
       toast.error("Please fill all the fields", { id: "toast1" });
       return;
     }
-    axios.post("http://localhost:4000/api/new_entry", newEntry).then((res) => {
+    axios.post(`http://localhost:4000/api/new_entry/${id}`, newEntry).then((res) => {
       if (res.status === 200) {
         toast.success("Entry saved successfully");
         setNewEntry({
           title: "",
-          date: new Date().toDateString(),
           mood: "",
           location: "",
           tags: [],
           content: "",
         });
+        setTags([]);
       }
     });
   };

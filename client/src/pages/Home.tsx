@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   BookOpen,
   Calendar,
@@ -11,14 +12,12 @@ import {
   MoreHorizontal,
   Plus,
   Search,
-  Settings,
   Star,
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ProfileModal from "../modals/profileModal";
-import axios from "axios";
 
 interface DataTypes {
   title: string;
@@ -31,6 +30,7 @@ interface DataTypes {
 
 export default function HomePage() {
   const [data, setData] = useState<DataTypes[]>([]);
+  const [name, setName] = useState("");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
@@ -43,16 +43,19 @@ export default function HomePage() {
   const loadData = () => {
     const token = localStorage.getItem("journal-token");
     axios
-      .get(
-        `http://localhost:4000/api/user/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .then((res) => console.log("RES----", res));
+      .get(`http://localhost:4000/api/user/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setData(res.data.data);
+        setName(res.data.name);
+        console.log(res.data)
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   return (
@@ -67,7 +70,7 @@ export default function HomePage() {
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-xl font-bold text-slate-800">
-                {id?.split(" ")[0]} Journal
+                {name.split(" ")[0]} Journal
               </h1>
             </div>
 
@@ -131,7 +134,7 @@ export default function HomePage() {
 
             {/* New Entry Button */}
             <button
-              onClick={() => navigate("/entry")}
+              onClick={() => navigate(`/entry/${id}`)}
               className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Plus className="w-4 h-4" />
@@ -142,60 +145,64 @@ export default function HomePage() {
 
         {/* Journal Entries Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Entry 1 */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300 group">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-slate-500" />
-                  <span className="text-sm text-slate-500">Today</span>
-                </div>
-                <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <MoreHorizontal className="w-4 h-4 text-slate-400 hover:text-slate-600" />
-                </button>
-              </div>
-
-              <h3 className="text-lg font-semibold text-slate-800 mb-2 line-clamp-2">
-                Morning Reflections on Growth
-              </h3>
-
-              <p className="text-slate-600 text-sm mb-4 line-clamp-3">
-                Started the day with meditation and journaling. Reflecting on
-                how much I've grown this past month and the challenges that have
-                shaped me...
-              </p>
-
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">😌</span>
-                  <div className="flex items-center gap-1 text-slate-500">
-                    <MapPin className="w-3 h-3" />
-                    <span className="text-xs">Home</span>
+          {data.map((entry, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300 group"
+            >
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm text-slate-500">{entry.date}</span>
                   </div>
+                  <button className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <MoreHorizontal className="w-4 h-4 text-slate-400 hover:text-slate-600" />
+                  </button>
                 </div>
-                <div className="flex items-center gap-1 text-slate-500">
-                  <Clock className="w-3 h-3" />
-                  <span className="text-xs">8:30 AM</span>
+
+                <h3 className="text-lg font-semibold text-slate-800 mb-2 line-clamp-2">
+                  {entry.title}
+                </h3>
+
+                <p className="text-slate-600 text-sm mb-4 line-clamp-3">
+                  {entry.content}
+                </p>
+
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    {/* <span className="text-xl">{entry.emoji}</span> */}
+                    <div className="flex items-center gap-1 text-slate-500">
+                      <MapPin className="w-3 h-3" />
+                      <span className="text-xs">{entry.location}</span>
+                    </div>
+                  </div>
+                  {/* <div className="flex items-center gap-1 text-slate-500">
+                    <Clock className="w-3 h-3" />
+                    <span className="text-xs">{entry.time}</span>
+                  </div> */}
                 </div>
-              </div>
 
-              <div className="flex flex-wrap gap-1 mb-4">
-                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
-                  morning
-                </span>
-                <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
-                  growth
-                </span>
-              </div>
+                <div className="flex flex-wrap gap-1 mb-4">
+                  {entry.tags.map((tag: string, i: number) => (
+                    <span
+                      key={i}
+                      className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <div className="flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-slate-400" />
-                  <Star className="w-4 h-4 text-slate-400" />
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-4 h-4 text-slate-400" />
+                    <Star className="w-4 h-4 text-slate-400" />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
 
         {/* Load More */}

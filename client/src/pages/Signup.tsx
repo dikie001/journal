@@ -10,7 +10,7 @@ import {
   User,
   UserPlus,
 } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -19,7 +19,6 @@ interface UserTypes {
   email: string;
   phone_number: number | undefined;
   password: string;
-  date: string;
 }
 
 export default function SignUpPage() {
@@ -32,7 +31,6 @@ export default function SignUpPage() {
     email: "",
     phone_number: undefined,
     password: "",
-    date: new Date().toDateString(),
   });
 
   //update the newUser object
@@ -71,7 +69,6 @@ export default function SignUpPage() {
       email: "",
       phone_number: undefined,
       password: "",
-      date: new Date().toDateString(),
     });
     setLoading(false);
   };

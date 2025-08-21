@@ -22,10 +22,10 @@ export default function LoginPage() {
       toast.error("Fill all fields", { id: "toast1" });
     }
     axios.post("http://localhost:4000/api/login", userDetails).then((res) => {
-      localStorage.setItem("journal-token", JSON.stringify(res.data.token));
+      localStorage.setItem("journal-token", res.data.token);
       if (res.status === 200) {
         toast.success(`Welcome back, ${res.data.name}`, { id: "toast2" });
-        navigate(`/${res.data.name}`);
+        navigate(`/${res.data.userId}`);
       }
     });
   };
