@@ -1,6 +1,8 @@
 import axios from "axios";
 import { Chrome, EyeOff, Github, Lock, LogIn, Mail } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface UserTypes {
   email: string;
@@ -8,6 +10,7 @@ interface UserTypes {
 }
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const [userDetails, setUSerDetails] = useState<UserTypes>({
     email: "",
     password: "",
@@ -15,9 +18,16 @@ export default function LoginPage() {
 
   //authenticate the user
   const handleLogin = () => {
-    axios
-      .post("http://localhost:4000/api/login", userDetails)
-      .then((res) => console.log(res));
+    if (!userDetails.email || !userDetails.password) {
+      toast.error("Fill all fields", { id: "toast1" });
+    }
+    axios.post("http://localhost:4000/api/login", userDetails).then((res) => {
+      localStorage.setItem("journal-token", JSON.stringify(res.data.token));
+      if (res.status === 200) {
+        toast.success(`Welcome back, ${res.data.name}`, { id: "toast2" });
+        navigate(`/${res.data.name}`);
+      }
+    });
   };
 
   //update the user object

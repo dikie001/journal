@@ -21,9 +21,20 @@ app.post("/api/new_entry", (req, res) => {
     .catch((err) => res.json(err));
 });
 
-app.get("/", (req, res) => {
-  res.send("No data");
-  console.log("no data in db..");
+//protected route
+app.get("/api/user/:id", (req, res) => {
+  console.log('hellow');
+  const userId = req.params.id
+
+  const authHeaders = req.headers["authorization"];
+  const token = authHeaders && authHeaders.split("")[1];
+
+  if (!token) return res.status(401).json({ error: "No token provided" });
+
+  jwt.verify(token, SECRET, (err, user) => {
+    if (err) return res.status(401).json({ error: "Invalid token !" });
+  });
+//   res.json({ message: "Welcome to your account" });
 });
 
 //create new user
@@ -39,9 +50,8 @@ app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await userModel.findOne({ email });
   if (user && user.password === password) {
-    console.log("creating token");
     const token = jwt.sign({ email }, SECRET, { expiresIn: "2h" });
-    res.json({ token });
+    res.json({ name: user.full_name, token: token });
   } else {
     res.status(401).json({ error: "Invalid credentials!" });
   }

@@ -15,8 +15,8 @@ import {
   Star,
   User,
 } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import ProfileModal from "../modals/profileModal";
 import axios from "axios";
 
@@ -31,16 +31,30 @@ interface DataTypes {
 
 export default function HomePage() {
   const [data, setData] = useState<DataTypes[]>([]);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   //load data from db
   const loadData = () => {
+    const token = localStorage.getItem("journal-token");
     axios
-      .post("http://localhost:4000/api/data", {})
-      .then((res) => setData(res.data));
-      
+      .get(
+        `http://localhost:4000/api/user/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => console.log("RES----", res));
   };
-  const navigate = useNavigate();
-  const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
@@ -52,7 +66,9 @@ export default function HomePage() {
               <div className="p-2 bg-blue-600 rounded-lg">
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-slate-800">My Journal</h1>
+              <h1 className="text-xl font-bold text-slate-800">
+                {id?.split(" ")[0]} Journal
+              </h1>
             </div>
 
             {/* Search Bar */}
