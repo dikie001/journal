@@ -5,9 +5,11 @@ import {
   ChevronDown,
   Clock,
   Filter,
+  FolderGit,
   Grid,
   Heart,
   List,
+  LucideFileInput,
   MapPin,
   MoreHorizontal,
   Plus,
@@ -42,6 +44,7 @@ export default function HomePage() {
   //load data from db
   const loadData = () => {
     const token = localStorage.getItem("journal-token");
+
     axios
       .get(`http://localhost:4000/api/user/${id}`, {
         headers: {
@@ -51,7 +54,7 @@ export default function HomePage() {
       .then((res) => {
         setData(res.data.data);
         setName(res.data.name);
-        console.log(res.data)
+        console.log(res.data);
       })
       .catch((err) => {
         console.error(err);
@@ -109,7 +112,9 @@ export default function HomePage() {
             {/* Quick Stats */}
             <div className="flex items-center gap-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">42</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {data.length}
+                </div>
                 <div className="text-xs text-slate-500">Total</div>
               </div>
             </div>
@@ -206,11 +211,11 @@ export default function HomePage() {
         </div>
 
         {/* Load More */}
-        <div className="text-center mt-12">
-          <button className="px-8 py-3 border-2 border-slate-300 text-slate-700 rounded-lg hover:border-slate-400 hover:bg-slate-50 transition-colors font-medium">
-            Load More Entries
-          </button>
-        </div>
+        {data.length === 0 && (
+          <div className="text-center mt-12">
+            <p>NO JOURNALS SAVED YET</p>
+          </div>
+        )}
       </div>
       {/* MODALS */}
       {showProfileModal && <ProfileModal />}

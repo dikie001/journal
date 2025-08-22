@@ -68,7 +68,7 @@ app.get("/api/user/:id", async (req, res) => {
     if (success) {
       console.log("token verified successfully");
       const userJournals = await journalModel.find({ user_id: userId });
-      return res.json({ name: user.full_name, data:userJournals });
+      return res.json({ name: user.full_name, data: userJournals });
     }
   } catch (err) {
     console.log("Error: ", err);
@@ -103,12 +103,42 @@ app.post("/api/login", async (req, res) => {
   const isCorrectPassword = bcrypt.compareSync(password, hashedPassword);
 
   if (isCorrectPassword) {
-    const token = jwt.sign({ email }, SECRET, { expiresIn: "2h" });
+    const token = jwt.sign({ email }, SECRET, { expiresIn: "240h" });
     res.json({ userId: user._id, name: user.full_name, token: token });
   } else {
     res.status(401).json({ error: "Invalid credentials!" });
   }
 });
+
+//validate token on first load of app
+app.get("/api/firstLoad", async (req, res) => {
+  const authHeaders = req.headers["authorization"];
+  const token = authHeaders && authHeaders.split(" ")[1];
+
+  let success;
+  try {
+    jwt.verify(token, SECRET, (err, decoded) => {
+      if (err) {
+        res.status(401).json({ err });
+        console.log("TOKEN---", err);
+      } else {
+        success = true;
+      }
+      if (success) {
+        const findUser = async () => {
+          console.log("Token verified");
+          const email = decoded.email
+          const user = await userModel.findOne({ email });
+          res.status(201).json({ message: "Token verified successfully", userId:user._id});
+        };
+        findUser();
+      }
+    });
+  } catch (err) {
+    res.status(401).json({ error: "Error validating token", err });
+  }
+});
+
 app.listen(4000, () => {
   console.log("Server is live on port 4000");
 });
